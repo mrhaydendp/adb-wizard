@@ -13,7 +13,7 @@ if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "ADB Installer"
+$form.Text = "ADB Wizard"
 $form.StartPosition = "CenterScreen"
 $form.ClientSize = New-Object System.Drawing.Point(550,300)
 $form.ForeColor = $theme[0]
