@@ -1,15 +1,15 @@
-# Run as Admin
+# If not Admin, run with Admin privileges 
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-	#Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
+	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
 }
 
-# Set Theme Based on AppsUseLightTheme Prefrence
+# Set application theme based on AppsUseLightTheme prefrence
 $theme = @("#ffffff","#202020","#323232")
 if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme"){
     $theme = @("#292929","#f3f3f3","#fbfbfb")
 }
 
-# GUI Specs
+# GUI specs
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $form = New-Object System.Windows.Forms.Form
@@ -19,6 +19,7 @@ $form.ClientSize = New-Object System.Drawing.Point(550,300)
 $form.ForeColor = $theme[0]
 $form.BackColor = $theme[1]
 
+# Instructional text
 $description = New-Object System.Windows.Forms.Label
 $description.Text = "Welcome to ADB Wizard, a graphical tool designed to effortlessly install ADB (Android Debug Bridge) system-wide on Windows. Please Select an installation directory for ADB."
 $description.Size = New-Object System.Drawing.Size(400,40)
@@ -26,10 +27,11 @@ $description.Location = New-Object System.Drawing.Size(10,20)
 $description.ForeColor = $theme[0]
 $form.Controls.Add($description)
 
+# Buttons
 $filepath = New-Object System.Windows.Forms.Textbox
 $filepath.Text = ("$HOME")
 $filepath.Size = New-Object System.Drawing.Size(400,40)
-$filepath.Location = New-Object System.Drawing.Size(140,150)
+$filepath.Location = New-Object System.Drawing.Size(140,130)
 $filepath.ForeColor = $theme[0]
 $filepath.BackColor = $theme[2]
 $form.Controls.Add($filepath)
@@ -37,7 +39,7 @@ $form.Controls.Add($filepath)
 $browse = New-Object System.Windows.Forms.Button
 $browse.Text = "Browse"
 $browse.Size = New-Object System.Drawing.Size(120,40)
-$browse.Location = New-Object System.Drawing.Size(10,140)
+$browse.Location = New-Object System.Drawing.Size(10,120)
 $browse.FlatStyle = "0"
 $browse.FlatAppearance.BorderSize = "0"
 $browse.BackColor = $theme[2]
@@ -61,6 +63,15 @@ $exit.FlatAppearance.BorderSize = "0"
 $exit.BackColor = $theme[2]
 $form.Controls.Add($exit)
 
+# If ADB is found, update buttons
+try{
+    (adb --version | Select-String "C:(.*?)platform-tools").Matches.Value -replace "\\platform-tools" | % {
+        Write-Host "ADB Found at: $_\platform-tools"
+        $install.Text = "Update"
+        $filepath.Text = "$_"
+    }
+} catch {}
+
 # Select installation folder in filepicker & set in textbox
 $browse.Add_Click{
     $FileBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
@@ -77,8 +88,11 @@ $install.Add_Click{
     Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
     Expand-Archive -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
     [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";$path\platform-tools", [EnvironmentVariableTarget]::Machine)
+    Write-Host "ADB Installed"
+    $install.Text = "Update"
 }
 
+# Exit application
 $exit.Add_Click{
     Write-Host "Exiting..."
     $form.Close()
