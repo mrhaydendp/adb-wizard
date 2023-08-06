@@ -19,8 +19,15 @@ $form.ClientSize = New-Object System.Drawing.Point(550,300)
 $form.ForeColor = $theme[0]
 $form.BackColor = $theme[1]
 
+$description = New-Object System.Windows.Forms.Label
+$description.Text = "Welcome to ADB Wizard, a graphical tool designed to effortlessly install ADB (Android Debug Bridge) system-wide on Windows. Please Select an installation directory for ADB."
+$description.Size = New-Object System.Drawing.Size(400,40)
+$description.Location = New-Object System.Drawing.Size(10,20)
+$description.ForeColor = $theme[0]
+$form.Controls.Add($description)
+
 $filepath = New-Object System.Windows.Forms.Textbox
-$filepath.Text = ($HOME)
+$filepath.Text = ("$HOME")
 $filepath.Size = New-Object System.Drawing.Size(400,40)
 $filepath.Location = New-Object System.Drawing.Size(140,150)
 $filepath.ForeColor = $theme[0]
@@ -53,5 +60,28 @@ $exit.FlatStyle = "0"
 $exit.FlatAppearance.BorderSize = "0"
 $exit.BackColor = $theme[2]
 $form.Controls.Add($exit)
+
+# Select installation folder in filepicker & set in textbox
+$browse.Add_Click{
+    $FileBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+    [void]$FileBrowser.ShowDialog()
+    if ($FileBrowser.SelectedPath){
+        $filepath.Text  = $FileBrowser.SelectedPath
+    }
+}
+
+# Install ADB to selected folder & make environment variable
+$install.Add_Click{
+    $path = $filepath.Text
+    Write-Host "Installing to: $path"
+    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
+    Expand-Archive -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
+    [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";$path\platform-tools", [EnvironmentVariableTarget]::Machine)
+}
+
+$exit.Add_Click{
+    Write-Host "Exiting..."
+    $form.Close()
+}
 
 $form.ShowDialog()
