@@ -7,10 +7,12 @@ A graphical tool designed to effortlessly install ADB (Android Debug Bridge) sys
 - ADB Updater
 - Install [Universal ADB Driver](https://adb.clockworkmod.com/) (optional)
 
-![Screenshot (Dark Mode)](ADB-Wizard.png)
+Dark | Light
+:---:|:-----:
+![Screenshot (Dark Mode)](ADB-Wizard.png)|![Screenshot (Light Mode)](ADB-Wizard-Light.png)
 
 ## How to Run
-Paste this command into Windows Terminal/Powershell (Admin)
+Paste this command into Windows Terminal/Powershell (Admin):
 ``` powershell
 iwr "https://github.com/mrhaydendp/adb-wizard/raw/main/ADB%20Wizard.ps1" | iex
 ```
