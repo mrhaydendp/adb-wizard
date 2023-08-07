@@ -36,6 +36,15 @@ $filepath.ForeColor = $theme[0]
 $filepath.BackColor = $theme[2]
 $form.Controls.Add($filepath)
 
+$check = New-Object System.Windows.Forms.CheckBox
+$check.Text = "Install Universal ADB Drivers (Optional)"
+$check.Size = New-Object System.Drawing.Size(220,20)
+$check.Location = New-Object System.Drawing.Size(140,155)
+$check.FlatStyle = "0"
+$check.FlatAppearance.BorderSize = "0"
+$check.ForeColor = $theme[0]
+$form.Controls.Add($check)
+
 $browse = New-Object System.Windows.Forms.Button
 $browse.Text = "Browse"
 $browse.Size = New-Object System.Drawing.Size(120,40)
@@ -65,7 +74,7 @@ $form.Controls.Add($exit)
 
 # If ADB is found, update buttons
 try{
-    (adb --version | Select-String "C:(.*?)platform-tools").Matches.Value -replace "\\platform-tools" | % {
+    (adb --version | Select-String "[A-Z]:(.*?)platform-tools").Matches.Value -replace "\\platform-tools" | % {
         Write-Host "ADB Found at: $_\platform-tools"
         $install.Text = "Update"
         $filepath.Text = "$_"
@@ -81,15 +90,25 @@ $browse.Add_Click{
     }
 }
 
-# Install ADB to selected folder & make environment variable
+# Install ADB to selected folder & make environment variable. If checkbox is checked, install Universal ADB Drivers
 $install.Add_Click{
     $path = $filepath.Text
-    Write-Host "Installing to: $path"
+    Write-Host "Installing ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
     Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
     Expand-Archive -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
     [Environment]::SetEnvironmentVariable("PATH", $Env:PATH + ";$path\platform-tools", [EnvironmentVariableTarget]::Machine)
-    Write-Host "ADB Installed"
-    $install.Text = "Update"
+    if (Test-Path "$path\platform-tools"){
+        Write-Host "Successfully Installed ADB to: $path\platform-tools"
+        $install.Text = "Update"
+    }
+    if ($check.Checked){
+        Write-Host "Installing Universal ADB Driver: https://adb.clockworkmod.com/"
+        Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"; .\UniversalAdbDriverSetup.msi /passive
+        if (Test-Path "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver"){
+            Write-Host "Successfully Installed Universal ADB Drivers"
+        }
+    }
+
 }
 
 # Exit application
