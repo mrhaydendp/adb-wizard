@@ -1,10 +1,10 @@
-# ADB-Wizard (W.I.P)
+# ADB Wizard
 A graphical tool designed to effortlessly install ADB (Android Debug Bridge) system-wide on Windows.
 
 ## Features
 - Uninstall/install ADB
-- Access ADB from anywhere
-- ADB Updater
+- Access ADB system-wide
+- Update ADB
 - Install [Universal ADB Driver](https://adb.clockworkmod.com/) (optional)
 
 Dark | Light
