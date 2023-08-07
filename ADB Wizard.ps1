@@ -106,6 +106,7 @@ $install.Add_Click{
         Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"; .\UniversalAdbDriverSetup.msi /passive
         while (!(Test-Path "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver")){}
         Write-Host "Successfully Installed Universal ADB Driver"
+        Remove-Item .\UniversalAdbDriverSetup.msi
     }
 
 }
