@@ -123,11 +123,9 @@ $uninstall.Add_Click{
     }
     Write-Host "Removing ADB Environment Variable"
     [Environment]::SetEnvironmentVariable("Path", "$null", "User")
-    if (!("$Env:PATH" | Select-String "platform-tools")){
-        $uninstall.Location = New-Object System.Drawing.Size(500,500)
-        $install.Text = "Install"
-        Write-Host "Successfully Removed ADB & Environment Variable"
-    }
+    $uninstall.Location = New-Object System.Drawing.Size(500,500)
+    $install.Text = "Install"
+    Write-Host "Successfully Removed ADB & Environment Variable"
 }
 
 $form.ShowDialog()
