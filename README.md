@@ -9,7 +9,7 @@ A graphical tool designed to effortlessly install ADB (Android Debug Bridge) sys
 
 Dark | Light
 :---:|:-----:
-![Screenshot (Dark Mode)](ADB-Wizard.png)|![Screenshot (Light Mode)](ADB-Wizard-Light.png)
+![Screenshot (Dark Mode)](Images/ADB-Wizard.png)|![Screenshot (Light Mode)](Images/ADB-Wizard-Light.png)
 
 ## How to Run
 Paste this command into Windows Terminal/Powershell (Admin):
