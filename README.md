@@ -16,4 +16,4 @@ Paste this command into Windows Terminal/Powershell (Admin):
 ``` powershell
 iwr "https://github.com/mrhaydendp/adb-wizard/raw/main/ADB-Wizard.ps1" | iex
 ```
-Or, download `ADB Wizard.ps1` and run locally
+Or, download `ADB-Wizard.ps1` and run locally
