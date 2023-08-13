@@ -1,6 +1,6 @@
 # If not Admin, run with Admin privileges 
 If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
+    Start-Process powershell.exe "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
 }
 
 # Set application theme based on AppsUseLightTheme prefrence
@@ -93,6 +93,13 @@ $browse.Add_Click{
 
 # Install ADB to selected folder & make environment variable. If checkbox is checked, install Universal ADB Drivers
 $install.Add_Click{
+    if ($adbdrivers.Checked){
+        Write-Host "`nInstalling Universal ADB Driver: https://adb.clockworkmod.com/"
+        Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"; .\UniversalAdbDriverSetup.msi /passive
+        while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)){}
+        Write-Host "Successfully Installed Universal ADB Driver"
+        Remove-Item .\UniversalAdbDriverSetup.msi
+    }
     Write-Host "`nInstalling ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
     Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
     Expand-Archive -Verbose -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
@@ -102,13 +109,6 @@ $install.Add_Click{
         Write-Host "`nNote: You may need to restart the PowerShell window to access ADB"
         $install.Text = "Update"
         $uninstall.Location = New-Object System.Drawing.Size(270,250)
-    }
-    if ($adbdrivers.Checked){
-        Write-Host "`nInstalling Universal ADB Driver: https://adb.clockworkmod.com/"
-        Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"; .\UniversalAdbDriverSetup.msi /passive
-        while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)){}
-        Write-Host "Successfully Installed Universal ADB Driver"
-        Remove-Item .\UniversalAdbDriverSetup.msi
     }
 }
 
