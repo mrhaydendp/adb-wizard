@@ -103,7 +103,7 @@ $install.Add_Click{
     Write-Host "`nInstalling ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
     Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
     Expand-Archive -Verbose -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
-    [Environment]::SetEnvironmentVariable("Path", "$Env:PATH" + "$path\platform-tools", "User")
+    [Environment]::SetEnvironmentVariable("Path", "$Env:PATH;$path\platform-tools", "User")
     if (Test-Path "$path\platform-tools"){
         Write-Host "Successfully Installed ADB to:" "'$path\platform-tools'"
         Write-Host "`nNote: You may need to restart the PowerShell window to access ADB"
