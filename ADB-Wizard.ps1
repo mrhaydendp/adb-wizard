@@ -72,15 +72,14 @@ $uninstall.FlatAppearance.BorderSize = "0"
 $uninstall.BackColor = $theme[2]
 $form.Controls.Add($uninstall)
 
-# If ADB is found, update buttons & $path variable
+# If ADB is found, update buttons
 try{
     (adb --version | Select-String "[A-Z]:(.*?)platform-tools").Matches.Value -replace "\\platform-tools" | % {
-        Write-Host "ADB Found at:" "'$_\platform-tools'"
+        Write-Host "ADB Found at: '$_\platform-tools'"
         $install.Text = "Update"
         $filepath.Text = "$_"
     }
 } catch { $uninstall.Location = New-Object System.Drawing.Size(500,500) }
-$path = $filepath.Text
 
 # Select installation folder in filepicker & set in textbox
 $browse.Add_Click{
@@ -101,11 +100,11 @@ $install.Add_Click{
         Remove-Item .\UniversalAdbDriverSetup.msi
     }
     Write-Host "`nInstalling ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
-    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$path"
-    Expand-Archive -Verbose -Force "$path\platform-tools-latest-windows.zip" -Destination "$path"; Remove-Item "$path\platform-tools-latest-windows.zip"
-    [Environment]::SetEnvironmentVariable("Path", "$Env:PATH;$path\platform-tools", "User")
-    if (Test-Path "$path\platform-tools"){
-        Write-Host "Successfully Installed ADB to:" "'$path\platform-tools'"
+    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$($filepath.Text)"
+    Expand-Archive -Verbose -Force "$($filepath.Text)\platform-tools-latest-windows.zip" -Destination "$($filepath.Text)"; Remove-Item "$($filepath.Text)\platform-tools-latest-windows.zip"
+    [Environment]::SetEnvironmentVariable("Path", "$Env:PATH;$($filepath.Text)\platform-tools", "User")
+    if (Test-Path "$($filepath.Text)\platform-tools"){
+        Write-Host "Successfully Installed ADB to: '$($filepath.Text)\platform-tools'"
         Write-Host "`nNote: You may need to restart the PowerShell window to access ADB"
         $install.Text = "Update"
         $uninstall.Location = New-Object System.Drawing.Size(270,250)
@@ -114,8 +113,8 @@ $install.Add_Click{
 
 # Delete ADB & drivers (if present) then, set environment variable to null
 $uninstall.Add_Click{
-    Write-Host "`nRemoving ADB From:" "'$path\platform-tools'"
-    Remove-Item -Verbose -Recurse "$path\platform-tools"
+    Write-Host "`nRemoving ADB From: '$($filepath.Text)\platform-tools'"
+    Remove-Item -Verbose -Recurse "$($filepath.Text)\platform-tools"
     if (Test-Path "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver"){
         Write-Host "Removing Universal ADB Driver"
         Get-Package -Name "Universal Adb Driver" | Uninstall-Package
