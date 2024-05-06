@@ -73,14 +73,15 @@ $uninstall.FlatAppearance.BorderSize = "0"
 $uninstall.BackColor = $theme[2]
 $form.Controls.Add($uninstall)
 
-# If ADB is found, update buttons
-try{
-    (adb --version | Select-String "[A-Z]:(.*?)platform-tools").Matches.Value -replace "\\platform-tools" | % {
-        Write-Host "ADB Found at: '$_\platform-tools'"
-        $install.Text = "Update"
-        $filepath.Text = "$_"
-    }
-} catch { $uninstall.Location = New-Object System.Drawing.Size(500,500) }
+# If ADB is found, update buttons & show uninstall option
+$uninstall.Hide()
+if (Get-Command adb -ErrorAction SilentlyContinue){
+    $location = ("$env:PATH").split(";") | Select-String "platform-tools"
+    Write-Host "ADB Found at: $location"
+    $install.Text = "Update"
+    $filepath.Text = "$location"
+    $uninstall.Show()
+}
 
 # Select installation folder in filepicker & set in textbox
 $browse.Add_Click{
@@ -108,7 +109,7 @@ $install.Add_Click{
         Write-Host "Successfully Installed ADB to: '$($filepath.Text)\platform-tools'"
         Write-Host "`nNote: You may need to restart the PowerShell window to access ADB"
         $install.Text = "Update"
-        $uninstall.Location = New-Object System.Drawing.Size(270,250)
+        $uninstall.Show()
     }
 }
 
@@ -123,7 +124,7 @@ $uninstall.Add_Click{
     }
     Write-Host "Removing ADB Environment Variable"
     [Environment]::SetEnvironmentVariable("Path", "$null", "User")
-    $uninstall.Location = New-Object System.Drawing.Size(500,500)
+    $uninstall.Hide()
     $install.Text = "Install"
     Write-Host "Successfully Removed ADB & Environment Variable"
 }
