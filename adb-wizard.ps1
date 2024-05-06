@@ -22,7 +22,7 @@ function install_adb($selected_path) {
         Write-Host "Making ADB Available User-wide"
         Set-Item -Path Env:\PATH -Value ("$env:PATH;$selected_path\platform-tools")
         [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
-        Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`nNote: You may need to restart the PowerShell window to access ADB"
+        Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`n"
         $install.Text = "Update"
         $uninstall.Show()
     }
@@ -30,11 +30,11 @@ function install_adb($selected_path) {
 
 # Install Universal ADB Driver
 function install_adbdrivers {
-    Write-Host "`nInstalling Universal ADB Driver: https://adb.clockworkmod.com/"
+    Write-Host "Installing Universal ADB Driver: https://adb.clockworkmod.com/"
     Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"
     .\UniversalAdbDriverSetup.msi /passive
     while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) {}
-    Write-Host "Successfully Installed Universal ADB Driver"
+    Write-Host "Success`n"
     Remove-Item .\UniversalAdbDriverSetup.msi
 }
 
@@ -45,6 +45,7 @@ function uninstall_adb {
     Remove-Item -Recurse "$location"
     Set-Item -Path Env:\PATH -Value ("$env:PATH".replace(";$location",""))
     [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
+    if (!("$env:PATH".Contains("$location"))) { Write-Host "Success`n" }
     $install.Text = "Install"
     $uninstall.Hide()
 }
@@ -54,6 +55,7 @@ function uninstall_adbdrivers {
     Write-Host "Attempting to Uninstall Universal ADB Driver"
     Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue | Uninstall-Package
     Get-Item "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver" | % { Remove-Item -Recurse "$_" }
+    if (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) { Write-Host "Success`n" }
 }
 
 # GUI specs
@@ -134,6 +136,7 @@ $browse.Add_Click{
 $install.Add_Click{
     Write-Host "Backing Up PATH Environment Variable to PATH_BACKUP"
     [Environment]::SetEnvironmentVariable("PATH_BACKUP","$env:PATH","User")
+    if ("$env:PATH_BACKUP") { Write-Host "Success`n" }
     install_adb $filepath.Text
     if ($adbdrivers.Checked) { install_adbdrivers }
 }
