@@ -17,15 +17,13 @@ function install_adb($selected_path) {
     Write-Host "Installing ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
     Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$selected_path"
     Expand-Archive "$selected_path\platform-tools-latest-windows.zip" -Destination "$selected_path"
-    if (Test-Path "$selected_path\platform-tools") {
-        Remove-Item "$selected_path\platform-tools-latest-windows.zip"
-        Write-Host "Making ADB Available User-wide"
-        Set-Item -Path Env:\PATH -Value ("$env:PATH;$selected_path\platform-tools")
-        [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
-        Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`n"
-        $install.Text = "Update"
-        $uninstall.Show()
-    }
+    Remove-Item "$selected_path\platform-tools-latest-windows.zip"
+    Write-Host "Making ADB Available User-wide"
+    Set-Item -Path Env:\PATH -Value ("$env:PATH;$selected_path\platform-tools")
+    [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
+    Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`n"
+    $install.Text = "Update"
+    $uninstall.Show()
 }
 
 # Install Universal ADB Driver
@@ -42,7 +40,7 @@ function install_adbdrivers {
 function uninstall_adb {
     $location = "$env:PATH".split(";") | Select-String "platform-tools"
     Write-Host "Removing ADB from: $location"
-    Remove-Item -Recurse "$location"
+    Remove-Item -r "$location"
     Set-Item -Path Env:\PATH -Value ("$env:PATH".replace(";$location",""))
     [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
     if (!("$env:PATH".Contains("$location"))) { Write-Host "Success`n" }
@@ -52,9 +50,9 @@ function uninstall_adb {
 
 # Uninstall Universal ADB Driver and delete its directory
 function uninstall_adbdrivers {
-    Write-Host "Attempting to Uninstall Universal ADB Driver"
+    Write-Host "Uninstalling Universal ADB Driver"
     Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue | Uninstall-Package
-    Get-Item "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver" | % { Remove-Item -Recurse "$_" }
+    Get-Item "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver" | % { Remove-Item -r "$_" }
     if (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) { Write-Host "Success`n" }
 }
 
@@ -119,9 +117,9 @@ $uninstall.BackColor = $theme[2]
 $uninstall.Hide()
 if (Get-Command adb -ErrorAction SilentlyContinue) {
     $location = "$env:PATH".split(";") | Select-String "platform-tools"
-    Write-Host "ADB Found at: $location"
+    Write-Host "ADB Found at: $location`n"
     $install.Text = "Update"
-    $filepath.Text = "$location"
+    $filepath.Text = "$location".replace("\platform-tools","")
     $uninstall.Show()
 }
 
@@ -134,6 +132,10 @@ $browse.Add_Click{
 
 # Install ADB to selected folder & make environment variable. If checkbox is checked, install Universal ADB Drivers
 $install.Add_Click{
+    if ($install.Text -eq "Update") {
+        uninstall_adb
+        if (Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue) { uninstall_adbdrivers }
+    }
     Write-Host "Backing Up PATH Environment Variable to PATH_BACKUP"
     [Environment]::SetEnvironmentVariable("PATH_BACKUP","$env:PATH","User")
     if ("$env:PATH_BACKUP") { Write-Host "Success`n" }
