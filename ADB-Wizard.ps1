@@ -1,13 +1,57 @@
 # If script isn't running as admin, restart with admin privileges
-If (([Security.Principal.WindowsIdentity]::GetCurrent()).Owner.Value -ne "S-1-5-32-544"){
+If (([Security.Principal.WindowsIdentity]::GetCurrent()).Owner.Value -ne "S-1-5-32-544") {
+    $terminal = "powershell"
+    if (Get-Command wt -ErrorAction SilentlyContinue) { $terminal = "wt" }
     Start-Process wt -Verb RunAs "PowerShell -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     exit
 }
 
 # Set application theme based on AppsUseLightTheme prefrence
 $theme = @("#ffffff","#202020","#323232")
-if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme"){
+if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme") {
     $theme = @("#292929","#f3f3f3","#fbfbfb")
+}
+
+# Install and unzip ADB to selected path & add to PATH environment variable
+function install_adb($selected_path) {
+    Write-Host "Installing ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
+    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$selected_path"
+    Expand-Archive "$selected_path\platform-tools-latest-windows.zip" -Destination "$selected_path"
+    if (Test-Path "$selected_path\platform-tools") {
+        Remove-Item "$selected_path\platform-tools-latest-windows.zip"
+        Write-Host "Making ADB Available User-wide"
+        [Environment]::SetEnvironmentVariable("Path","$env:PATH;$selected_path\platform-tools","User")
+        Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`nNote: You may need to restart the PowerShell window to access ADB"
+        $install.Text = "Update"
+        $uninstall.Show()
+    }
+}
+
+# Install Universal ADB Driver
+function install_adbdrivers {
+    Write-Host "`nInstalling Universal ADB Driver: https://adb.clockworkmod.com/"
+    Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"
+    .\UniversalAdbDriverSetup.msi /passive
+    while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) {}
+    Write-Host "Successfully Installed Universal ADB Driver"
+    Remove-Item .\UniversalAdbDriverSetup.msi
+}
+
+# Get ADB location and delete directory, then remove from PATH
+function uninstall_adb {
+    $location = "$env:PATH".split(";") | Select-String "platform-tools"
+    Write-Host "Removing ADB from: $location"
+    Remove-Item -Recurse "$location"
+    [Environment]::SetEnvironmentVariable("Path",$env:PATH.replace(";$location",""),"User")
+    $install.Text = "Install"
+    $uninstall.Hide()
+}
+
+# Uninstall Universal ADB Driver and delete its directory
+function uninstall_adbdrivers {
+    Write-Host "Attempting to Uninstall Universal ADB Driver"
+    Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue | Uninstall-Package
+    Get-Item "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver" | % { Remove-Item -Recurse "$_" }
 }
 
 # GUI specs
@@ -69,8 +113,8 @@ $uninstall.BackColor = $theme[2]
 
 # If ADB is found, update buttons & show uninstall option
 $uninstall.Hide()
-if (Get-Command adb -ErrorAction SilentlyContinue){
-    $location = ("$env:PATH").split(";") | Select-String "platform-tools"
+if (Get-Command adb -ErrorAction SilentlyContinue) {
+    $location = "$env:PATH".split(";") | Select-String "platform-tools"
     Write-Host "ADB Found at: $location"
     $install.Text = "Update"
     $filepath.Text = "$location"
@@ -81,46 +125,21 @@ if (Get-Command adb -ErrorAction SilentlyContinue){
 $browse.Add_Click{
     $FileBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
     [void]$FileBrowser.ShowDialog()
-    if ($FileBrowser.SelectedPath){
-        $filepath.Text  = $FileBrowser.SelectedPath
-    }
+    if ($FileBrowser.SelectedPath) { $filepath.Text = $FileBrowser.SelectedPath }
 }
 
 # Install ADB to selected folder & make environment variable. If checkbox is checked, install Universal ADB Drivers
 $install.Add_Click{
-    if ($adbdrivers.Checked){
-        Write-Host "`nInstalling Universal ADB Driver: https://adb.clockworkmod.com/"
-        Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"; .\UniversalAdbDriverSetup.msi /passive
-        while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)){}
-        Write-Host "Successfully Installed Universal ADB Driver"
-        Remove-Item .\UniversalAdbDriverSetup.msi
-    }
-    Write-Host "`nInstalling ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
-    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$($filepath.Text)"
-    Expand-Archive -Verbose -Force "$($filepath.Text)\platform-tools-latest-windows.zip" -Destination "$($filepath.Text)"; Remove-Item "$($filepath.Text)\platform-tools-latest-windows.zip"
-    [Environment]::SetEnvironmentVariable("Path", "$Env:PATH;$($filepath.Text)\platform-tools", "User")
-    if (Test-Path "$($filepath.Text)\platform-tools"){
-        Write-Host "Successfully Installed ADB to: '$($filepath.Text)\platform-tools'"
-        Write-Host "`nNote: You may need to restart the PowerShell window to access ADB"
-        $install.Text = "Update"
-        $uninstall.Show()
-    }
+    Write-Host "Backing Up PATH Environment Variable to PATH_BACKUP"
+    [Environment]::SetEnvironmentVariable("PATH_BACKUP","$env:PATH","User")
+    install_adb $filepath.Text
+    if ($adbdrivers.Checked) { install_adbdrivers }
 }
 
 # Delete ADB & drivers (if present) then, set environment variable to null
 $uninstall.Add_Click{
-    Write-Host "`nRemoving ADB From: '$($filepath.Text)\platform-tools'"
-    Remove-Item -Verbose -Recurse "$($filepath.Text)\platform-tools"
-    if (Test-Path "C:\Program Files (x86)\ClockworkMod\Universal Adb Driver"){
-        Write-Host "Removing Universal ADB Driver"
-        Get-Package -Name "Universal Adb Driver" | Uninstall-Package
-        Remove-Item -Verbose -Recurse "C:\Program Files (x86)\ClockworkMod"
-    }
-    Write-Host "Removing ADB Environment Variable"
-    [Environment]::SetEnvironmentVariable("Path", "$null", "User")
-    $uninstall.Hide()
-    $install.Text = "Install"
-    Write-Host "Successfully Removed ADB & Environment Variable"
+    uninstall_adb
+    if (Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue) { uninstall_adbdrivers }
 }
 
 $window.Controls.AddRange(@($description,$filepath,$adbdrivers,$browse,$install,$uninstall))
