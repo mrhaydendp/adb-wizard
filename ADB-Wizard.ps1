@@ -1,6 +1,7 @@
-# If not Admin, run with Admin privileges 
-If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    Start-Process powershell.exe "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
+# If script isn't running as admin, restart with admin privileges
+If (([Security.Principal.WindowsIdentity]::GetCurrent()).Owner.Value -ne "S-1-5-32-544"){
+    Start-Process wt -Verb RunAs "PowerShell -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    exit
 }
 
 # Set application theme based on AppsUseLightTheme prefrence
@@ -21,7 +22,7 @@ $form.BackColor = $theme[1]
 
 # Instructional text
 $description = New-Object System.Windows.Forms.Label
-$description.Text = "Welcome to ADB Wizard, a graphical tool designed to effortlessly install ADB (Android Debug Bridge) system-wide on Windows. Please Select an installation directory for ADB."
+$description.Text = "Welcome to ADB Wizard, a graphical tool designed to effortlessly install ADB (Android Debug Bridge) user-wide on Windows. Please Select an installation directory for ADB."
 $description.Size = New-Object System.Drawing.Size(400,40)
 $description.Location = New-Object System.Drawing.Size(10,20)
 $description.ForeColor = $theme[0]
