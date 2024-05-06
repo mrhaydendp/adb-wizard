@@ -13,12 +13,12 @@ if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion
 # GUI specs
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "ADB Wizard"
-$form.StartPosition = "CenterScreen"
-$form.ClientSize = New-Object System.Drawing.Point(550,300)
-$form.ForeColor = $theme[0]
-$form.BackColor = $theme[1]
+$window = New-Object System.Windows.Forms.Form
+$window.Text = "ADB Wizard"
+$window.StartPosition = "CenterScreen"
+$window.ClientSize = New-Object System.Drawing.Point(550,300)
+$window.ForeColor = $theme[0]
+$window.BackColor = $theme[1]
 
 # Instructional text
 $description = New-Object System.Windows.Forms.Label
@@ -26,7 +26,6 @@ $description.Text = "Welcome to ADB Wizard, a graphical tool designed to effortl
 $description.Size = New-Object System.Drawing.Size(400,40)
 $description.Location = New-Object System.Drawing.Size(10,20)
 $description.ForeColor = $theme[0]
-$form.Controls.Add($description)
 
 # Buttons
 $filepath = New-Object System.Windows.Forms.Textbox
@@ -35,7 +34,6 @@ $filepath.Size = New-Object System.Drawing.Size(400,40)
 $filepath.Location = New-Object System.Drawing.Size(140,130)
 $filepath.ForeColor = $theme[0]
 $filepath.BackColor = $theme[2]
-$form.Controls.Add($filepath)
 
 $adbdrivers = New-Object System.Windows.Forms.CheckBox
 $adbdrivers.Text = "Install Universal ADB Drivers (Optional)"
@@ -44,7 +42,6 @@ $adbdrivers.Location = New-Object System.Drawing.Size(140,155)
 $adbdrivers.FlatStyle = "0"
 $adbdrivers.FlatAppearance.BorderSize = "0"
 $adbdrivers.ForeColor = $theme[0]
-$form.Controls.Add($adbdrivers)
 
 $browse = New-Object System.Windows.Forms.Button
 $browse.Text = "Browse"
@@ -53,7 +50,6 @@ $browse.Location = New-Object System.Drawing.Size(10,120)
 $browse.FlatStyle = "0"
 $browse.FlatAppearance.BorderSize = "0"
 $browse.BackColor = $theme[2]
-$form.Controls.Add($browse)
 
 $install = New-Object System.Windows.Forms.Button
 $install.Text = "Install"
@@ -62,7 +58,6 @@ $install.Location = New-Object System.Drawing.Size(410,250)
 $install.FlatStyle = "0"
 $install.FlatAppearance.BorderSize = "0"
 $install.BackColor = $theme[2]
-$form.Controls.Add($install)
 
 $uninstall = New-Object System.Windows.Forms.Button
 $uninstall.Text = "Uninstall"
@@ -71,7 +66,6 @@ $uninstall.Location = New-Object System.Drawing.Size(270,250)
 $uninstall.FlatStyle = "0"
 $uninstall.FlatAppearance.BorderSize = "0"
 $uninstall.BackColor = $theme[2]
-$form.Controls.Add($uninstall)
 
 # If ADB is found, update buttons & show uninstall option
 $uninstall.Hide()
@@ -129,4 +123,5 @@ $uninstall.Add_Click{
     Write-Host "Successfully Removed ADB & Environment Variable"
 }
 
-$form.ShowDialog()
+$window.Controls.AddRange(@($description,$filepath,$adbdrivers,$browse,$install,$uninstall))
+$window.ShowDialog()
