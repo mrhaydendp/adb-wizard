@@ -20,6 +20,7 @@ function install_adb($selected_path) {
     if (Test-Path "$selected_path\platform-tools") {
         Remove-Item "$selected_path\platform-tools-latest-windows.zip"
         Write-Host "Making ADB Available User-wide"
+        Set-Item -Path Env:\PATH -Value ("$env:PATH;$selected_path\platform-tools")
         [Environment]::SetEnvironmentVariable("Path","$env:PATH;$selected_path\platform-tools","User")
         Write-Host "Successfully Installed ADB to: '$selected_path\platform-tools'`nNote: You may need to restart the PowerShell window to access ADB"
         $install.Text = "Update"
