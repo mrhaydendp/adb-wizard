@@ -43,7 +43,8 @@ function uninstall_adb {
     $location = "$env:PATH".split(";") | Select-String "platform-tools"
     Write-Host "Removing ADB from: $location"
     Remove-Item -Recurse "$location"
-    [Environment]::SetEnvironmentVariable("Path",$env:PATH.replace(";$location",""),"User")
+    Set-Item -Path Env:\PATH -Value ("$env:PATH".replace(";$location",""))
+    [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
     $install.Text = "Install"
     $uninstall.Hide()
 }
