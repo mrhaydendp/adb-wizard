@@ -12,16 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PSScriptAnalyzer & ps2exe
+      - name: Install PSScriptAnalyzer
         shell: powershell
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module PSScriptAnalyzer ps2exe
+          Install-Module PSScriptAnalyzer
       
       - name: Analyze Script
         shell: powershell
         run: |
           Invoke-ScriptAnalyzer adb-wizard.ps1 -ExcludeRule PSAvoidUsingWriteHost
+
+      - name: Install PS2EXE
+        shell: powershell
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module ps2exe
 
       - name: Compile
         shell: powershell
