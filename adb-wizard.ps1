@@ -123,14 +123,14 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
     $uninstall.Show()
 }
 
-# Select installation folder in filepicker & set in textbox
+# Select installation folder in filepicker & display in textbox
 $browse.Add_Click{
     $FileBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
     [void]$FileBrowser.ShowDialog()
     if ($FileBrowser.SelectedPath) { $filepath.Text = $FileBrowser.SelectedPath }
 }
 
-# Install ADB to selected folder & make environment variable. If checkbox is checked, install Universal ADB Drivers
+# Backup $PATH and run install_adb & install_adbdrivers (uninstall first if updating)
 $install.Add_Click{
     if ($install.Text -eq "Update") {
         uninstall_adb
@@ -143,7 +143,7 @@ $install.Add_Click{
     if ($adbdrivers.Checked) { install_adbdrivers }
 }
 
-# Delete ADB & drivers (if present) then, set environment variable to null
+# Delete ADB & drivers (if present)
 $uninstall.Add_Click{
     uninstall_adb
     if (Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue) { uninstall_adbdrivers }
