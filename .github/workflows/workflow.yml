@@ -32,5 +32,4 @@ jobs:
       - name: Compile
         shell: powershell
         run: |
-          ps2exe adb-wizard.ps1 adb-wizard.exe -product "ADB Wizard" -description "ADB Wizard" 
-          -copyright "Hayden Plumley" -requireAdmin
+          ps2exe adb-wizard.ps1 adb-wizard.exe -product "ADB Wizard" -description "ADB Wizard" -copyright "Hayden Plumley" -requireAdmin
