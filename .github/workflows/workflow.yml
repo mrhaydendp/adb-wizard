@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    name: PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer & ps2exe
+        shell: powershell
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module ps2exe
+      
+      - name: Analyze Script
+        shell: powershell
+        run: |
+          Invoke-ScriptAnalyzer adb-wizard.ps1 -ExcludeRule PSAvoidUsingWriteHost
+
+      - name: Compile
+        shell: powershell
+        run: |
+          ps2exe adb-wizard.ps1 adb-wizard.exe -product "ADB Wizard" -description "ADB Wizard" 
+          -copyright "Hayden Plumley" -requireAdmin
