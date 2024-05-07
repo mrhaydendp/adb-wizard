@@ -16,7 +16,7 @@ jobs:
         shell: powershell
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
-          Install-Module ps2exe
+          Install-Module PSScriptAnalyzer ps2exe
       
       - name: Analyze Script
         shell: powershell
