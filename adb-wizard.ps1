@@ -111,9 +111,9 @@ $uninstall.Add_Click{
 function install_adb($filepath_text) {
     $selected_path = $filepath_text.replace("\platform-tools","")
     Write-Host "Installing ADB (Android Debug Bridge): https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
-    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$selected_path"
-    Expand-Archive "$selected_path\platform-tools-latest-windows.zip" -Destination "$selected_path"
-    Remove-Item "$selected_path\platform-tools-latest-windows.zip"
+    Start-BitsTransfer "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -Destination "$env:TEMP"
+    Expand-Archive "$env:TEMP\platform-tools-latest-windows.zip" -Destination "$selected_path"
+    Remove-Item "$env:TEMP\platform-tools-latest-windows.zip"
     Write-Host "Making ADB Available User-wide"
     Set-Item -Path Env:\PATH -Value ("$env:PATH;$selected_path\platform-tools")
     [Environment]::SetEnvironmentVariable("Path","$env:PATH","User")
@@ -126,11 +126,11 @@ function install_adb($filepath_text) {
 # Install Universal ADB Driver
 function install_adbdrivers {
     Write-Host "Installing Universal ADB Driver: https://adb.clockworkmod.com/"
-    Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi"
-    .\UniversalAdbDriverSetup.msi /passive
+    Start-BitsTransfer "https://github.com/koush/adb.clockworkmod.com/releases/latest/download/UniversalAdbDriverSetup.msi" -Destination "$env:TEMP"
+    & "$env:TEMP\UniversalAdbDriverSetup.msi" /passive
     while (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) {}
     Write-Host "Success`n"
-    Remove-Item .\UniversalAdbDriverSetup.msi
+    Remove-Item "$env:TEMP\UniversalAdbDriverSetup.msi"
 }
 
 # Get ADB location and delete directory, then remove from PATH
