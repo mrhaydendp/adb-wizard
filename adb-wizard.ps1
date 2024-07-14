@@ -7,7 +7,7 @@ If (([Security.Principal.WindowsIdentity]::GetCurrent()).Owner.Value -ne "S-1-5-
 }
 
 # Set application theme based on AppsUseLightTheme prefrence
-$theme = @("#ffffff","#202020","#323232")
+$theme = @("#fffefe","#202020","#323232")
 if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme") {
     $theme = @("#292929","#f3f3f3","#fbfbfb")
 }
