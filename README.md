@@ -12,7 +12,7 @@ Dark | Light
 ![Screenshot (Dark Mode)](Images/Screenshot.png)|![Screenshot (Light Mode)](Images/Screenshot-Light.png)
 
 ## How to Run
-Paste this command into Windows Terminal/Powershell (Admin):
+Paste this command into Windows Terminal/Powershell:
 ``` powershell
 iwr "https://github.com/mrhaydendp/adb-wizard/raw/main/adb-wizard.ps1" | iex
 ```
