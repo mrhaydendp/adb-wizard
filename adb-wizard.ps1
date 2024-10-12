@@ -1,11 +1,3 @@
-# If script isn't running as admin, restart with admin privileges
-If (([Security.Principal.WindowsIdentity]::GetCurrent()).Owner.Value -ne "S-1-5-32-544") {
-    $terminal = "powershell"
-    if (Get-Command wt -ErrorAction SilentlyContinue) { $terminal = "wt" }
-    Start-Process wt -Verb RunAs "PowerShell -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    exit
-}
-
 # Set application theme based on AppsUseLightTheme prefrence
 $theme = @("#fffefe","#202020","#323232")
 if (Get-ItemPropertyValue -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme") {
@@ -148,8 +140,10 @@ function uninstall_adb {
 # Uninstall Universal ADB Driver and delete its directory
 function uninstall_adbdrivers {
     Write-Host "Uninstalling Universal ADB Driver"
-    Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue | Uninstall-Package
-    if (Test-Path "C:\Program Files (x86)\ClockworkMod") { Remove-Item -r "C:\Program Files (x86)\ClockworkMod" }
+    Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue | Uninstall-Package -Force
+    if (Test-Path "C:\Program Files (x86)\ClockworkMod") {
+        Start-Process powershell.exe -Verb RunAs -ArgumentList "Remove-Item -r 'C:\Program Files (x86)\ClockworkMod'"
+    }
     if (!(Get-Package -Name "Universal Adb Driver" -ErrorAction SilentlyContinue)) { Write-Host "Success`n" }
 }
 
